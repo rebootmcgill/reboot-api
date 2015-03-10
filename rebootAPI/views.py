@@ -85,7 +85,7 @@ class MachineViewSet(viewsets.ModelViewSet):
 
     @list_route
     def pending(self, request):
-        Machine.objects.filter(picked_up=False)
+        queryset = Machine.objects.filter(picked_up=False)
         page = self.paginate_queryset(queryset)
         serializer = self.get_pagination_serializer(page)
         return Response(serializer.data)
@@ -99,7 +99,6 @@ router.register(r'os', OperatingSystemViewSet)
 router.register(r'presets', PresetViewSet)
 router.register(r'requests', RequestViewSet)
 router.register(r'machines', MachineViewSet)
-
 
 
 def get_router():
