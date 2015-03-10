@@ -1,7 +1,8 @@
-from django.shortcuts import render
 from rest_framework import routers, serializers, viewsets
+from rest_framework.response import Response
 from machinerequests.models import CPU, OperatingSystem, Preset, Request, Machine
 from django.contrib.auth.models import User
+from rest_framework.decorators import list_route
 
 # Data Serializers
 
@@ -9,33 +10,33 @@ from django.contrib.auth.models import User
 class CPUSerializer (serializers.HyperlinkedModelSerializer):
     class Meta:
         model = CPU
-        fields = ('name', 'cores', 'x64', 'clock')
+        fields = ('url', 'name', 'cores', 'x64', 'clock')
 
 
 class OperatingSystemSerializer (serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OperatingSystem
-        fields = ('name', 'version', 'experimental')
+        fields = ('url', 'name', 'version', 'experimental')
 
 
 class PresetSerializer (serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Preset
-        fields = ('cpu', 'ram', 'hdd')
+        fields = ('url', 'cpu', 'ram', 'hdd')
 
 
 class RequestSerializer (serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Request
-        fields = ('family_name', 'given_name', 'requester_type', 'faculty_and_dept', 'organization', 'preset', 'os',
-            'machine_use', 'need_display', 'need_keyboard', 'need_mouse', 'need_ethernet', 'extra_information',
+        fields = ('url', 'family_name', 'given_name', 'requester_type', 'faculty_and_dept', 'organization', 'preset',
+            'os', 'machine_use', 'need_display', 'need_keyboard', 'need_mouse', 'need_ethernet', 'extra_information',
             'amount', 'filled', 'filled_at', 'requested_at')
 
 
 class MachineSerializer (serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Machine
-        fields = ('request', 'fulfiller', 'cpu', 'ram', 'hdd', 'pickedup_at', 'notes', 'picked_up')
+        fields = ('url', 'request', 'fulfiller', 'cpu', 'ram', 'hdd', 'pickedup_at', 'notes', 'picked_up')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -70,20 +71,24 @@ class RequestViewSet(viewsets.ModelViewSet):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
 
+    @list_route
+    def pending(self, request):
+        queryset = Request.objects.filter(filled=False)
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_pagination_serializer(page)
+        return Response(serializer.data)
+
 
 class MachineViewSet(viewsets.ModelViewSet):
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
 
-
-class PendingMachineViewSet(viewsets.ModelViewSet):
-    queryset = Machine.objects.filter(picked_up=False)
-    serializer_class = MachineSerializer
-
-
-class PendingRequestViewSet(viewsets.ModelViewSet):
-    queryset = Request.objects.filter(filled=False)
-    serializer_class = RequestSerializer
+    @list_route
+    def pending(self, request):
+        Machine.objects.filter(picked_up=False)
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_pagination_serializer(page)
+        return Response(serializer.data)
 
 # The router routes all the routes
 
@@ -94,8 +99,7 @@ router.register(r'os', OperatingSystemViewSet)
 router.register(r'presets', PresetViewSet)
 router.register(r'requests', RequestViewSet)
 router.register(r'machines', MachineViewSet)
-router.register(r'machinespending', PendingMachineViewSet)
-router.register(r'requestspending', PendingRequestViewSet)
+
 
 
 def get_router():
