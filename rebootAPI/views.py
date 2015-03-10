@@ -21,7 +21,7 @@ class OperatingSystemSerializer (serializers.HyperlinkedModelSerializer):
 class PresetSerializer (serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Preset
-        fields = ('cpu', 'ram', 'hhd')
+        fields = ('cpu', 'ram', 'hdd')
 
 
 class RequestSerializer (serializers.HyperlinkedModelSerializer):
@@ -94,8 +94,8 @@ router.register(r'os', OperatingSystemViewSet)
 router.register(r'presets', PresetViewSet)
 router.register(r'requests', RequestViewSet)
 router.register(r'machines', MachineViewSet)
-router.register(r'machines/pending', PendingMachineViewSet)
-router.register(r'requests/pending', PendingRequestViewSet)
+router.register(r'machinespending', PendingMachineViewSet)
+router.register(r'requestspending', PendingRequestViewSet)
 
 
 def get_router():
