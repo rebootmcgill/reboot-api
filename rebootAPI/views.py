@@ -79,6 +79,11 @@ class RequestViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class PendingViewSet(viewsets.ModelViewSet):
+    queryset = Request.objects.filter(filled=False)
+    serializer_class = RequestSerializer
+
+
 class MachineViewSet(viewsets.ModelViewSet):
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
@@ -90,6 +95,10 @@ class MachineViewSet(viewsets.ModelViewSet):
         serializer = self.get_pagination_serializer(page)
         return Response(serializer.data)
 
+
+class PickupViewSet(viewsets.ModelViewSet):
+    queryset = Machine.objects.filter(picked_up=False)
+    serializer_class = MachineSerializer
 # The router routes all the routes
 
 router = routers.DefaultRouter()
@@ -99,6 +108,8 @@ router.register(r'os', OperatingSystemViewSet)
 router.register(r'presets', PresetViewSet)
 router.register(r'requests', RequestViewSet)
 router.register(r'machines', MachineViewSet)
+router.register(r'pending', PendingViewSet, base_name='pending')
+router.register(r'pickup', PickupViewSet, base_name='pickup')
 
 
 def get_router():
