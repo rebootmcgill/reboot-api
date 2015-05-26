@@ -59,7 +59,7 @@ class StatsAPI(APIView):
         now = timezone.now()
         month = datetime(now.year, now.month, 1, tzinfo=now.tzinfo)
         monthly = {'requests': Request.objects.filter(requested_at__gte=month).count(),
-            'fullfill': Request.objects.filter(filled=True, filled_at__gte=month).count(),
+            'fulfill': Request.objects.filter(filled=True, filled_at__gte=month).count(),
             'pickup': Machine.objects.filter(picked_up=True, pickedup_at__gte=month).count()}
         pending = {'fulfill': Request.objects.filter(filled=False).count(),
             'pickup': Machine.objects.filter(picked_up=False).count()}
