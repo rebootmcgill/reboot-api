@@ -1,8 +1,11 @@
 from rest_framework import routers, serializers, viewsets
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from machinerequests.models import CPU, OperatingSystem, Preset, Request, Machine
 from django.contrib.auth.models import User
 from rest_framework.decorators import list_route
+from django.utils import timezone
+from datetime import datetime
 
 # Data Serializers
 
@@ -43,6 +46,23 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('url', 'username', 'is_staff')
+
+
+# Views
+class StatsAPI(APIView):
+    """
+    Return a list of request statistics
+    """
+    def get(self, request, format=None):
+        now = timezone.now()
+        month = datetime(now.year, now.month, 1, tzinfo=now.tzinfo)
+        monthly = {'requests': Request.objects.filter(requested_at__gte=month).count(),
+            'fullfill': Request.objects.filter(filled=True, filled_at__gte=month).count(),
+            'pickup': Machine.objects.filter(picked_up=True, pickedup_at__gte=month).count()}
+        pending = {'fulfill': Request.objects.filter(filled=False).count(),
+            'pickup': Machine.objects.filter(picked_up=False).count()}
+        return Response({'current': pending, 'month': monthly})
+
 
 # View Sets
 
