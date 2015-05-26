@@ -1,4 +1,4 @@
-from rest_framework import routers, serializers, viewsets
+from rest_framework import routers, serializers, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from machinerequests.models import CPU, OperatingSystem, Preset, Request, Machine
@@ -53,6 +53,8 @@ class StatsAPI(APIView):
     """
     Return a list of request statistics
     """
+    permission_classes = (permissions.AllowAny,)
+
     def get(self, request, format=None):
         now = timezone.now()
         month = datetime(now.year, now.month, 1, tzinfo=now.tzinfo)
